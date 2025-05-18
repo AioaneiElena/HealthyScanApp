@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Body
 from services.ocr import extract_query_from_image
 from services.search import search_google_cse, adauga_pret_si_sorteaza
 
@@ -12,10 +12,22 @@ async def scan_image(file: UploadFile = File(...)):
 
 
 @router.post("/scan-and-search")
-async def scan_and_search(file: UploadFile = File(...)):
-    contents = await file.read()
-    query = extract_query_from_image(contents)
+async def scan_and_search(
+    file: UploadFile = File(None),
+    query: str = Body(default=None)
+):
+    # Dacă avem fișier, extragem query cu OCR
+    if file is not None:
+        contents = await file.read()
+        query = extract_query_from_image(contents)
+
+    if not query:
+        return {"query": "invalid", "top3": [], "toate": []}
+
+    print("🟡 QUERY:", query)
     rezultate = search_google_cse(query)
+    print("🟢 REZULTATE:", len(rezultate))
+
     produse_cu_pret = adauga_pret_si_sorteaza(rezultate)
     top3 = produse_cu_pret[:3]
 

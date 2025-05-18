@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, Image, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { useRouter } from 'expo-router';
 
 export default function ScanPhotoScreen() {
@@ -34,7 +33,7 @@ export default function ScanPhotoScreen() {
         type: "image/jpeg",
       } as any);
 
-      const response = await fetch("http://192.168.0.100:8000/scan-and-search", {
+      const response = await fetch("http://192.168.0.102:8000/scan-and-search", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -44,13 +43,12 @@ export default function ScanPhotoScreen() {
 
       const data = await response.json();
       router.push({
-        pathname: "/(stack)/results" ,
+        pathname: "/(stack)/results",
         params: {
           query: data.query,
           results: JSON.stringify(data.top3),
         },
-        });
-
+      });
     } catch (error) {
       Alert.alert("Eroare", "Nu s-a putut trimite imaginea.");
     }

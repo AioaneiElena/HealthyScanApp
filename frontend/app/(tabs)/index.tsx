@@ -9,22 +9,22 @@ export default function HomeScreen() {
       <Text style={styles.title}>🛒 Compară Prețuri</Text>
       <Text style={styles.subtitle}>Scanează un produs și află cel mai mic preț!</Text>
 
-      <View style={styles.button}>
-        <Button
-          title="📷 Scanează Poză"
-          onPress={() => router.push('/scan_photo')}
-          color="#2e7d32"
-        />
+      <View style={styles.buttonRow}>
+        <View style={styles.buttonWrapper}>
+          <Button
+            title="📷 Poză"
+            onPress={() => router.push('/scan_photo')}
+            color="#2e7d32"
+          />
+        </View>
+        <View style={styles.buttonWrapper}>
+          <Button
+            title="📦 Cod de Bare"
+            onPress={() => router.push('/barcode_scan' as any)}
+            color="#1565c0"
+          />
+        </View>
       </View>
-
-      {/* <View style={styles.button}>
-  <Button
-    title="📦 Scanează Cod de Bare"
-    onPress={() => router.push('/barcode_scan')}
-    color="#1565c0"
-  />
-</View> */}
-
     </View>
   );
 }
@@ -39,7 +39,10 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16, marginBottom: 30, color: '#666', textAlign: 'center',
   },
-  button: {
-    width: '100%', marginBottom: 15,
+  buttonRow: {
+    flexDirection: 'row', justifyContent: 'center', gap: 20,
+  },
+  buttonWrapper: {
+    flex: 1, marginHorizontal: 5,
   },
 });

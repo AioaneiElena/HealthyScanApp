@@ -48,6 +48,9 @@ def search_google_cse(query: str):
         return []
 
     data = response.json()
+    print("📡 CSE URL:", response.url)
+    print("📄 Răspuns JSON:", response.json())
+
     return [
         {
             "titlu": item.get("title"),
