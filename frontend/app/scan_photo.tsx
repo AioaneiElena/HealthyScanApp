@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, Button, Image, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import useAuthGuard from "../hooks/useAuthGuard"; 
 
 export default function ScanPhotoScreen() {
+  useAuthGuard();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -42,6 +44,8 @@ export default function ScanPhotoScreen() {
       });
 
       const data = await response.json();
+      console.log("🌐 Răspuns complet de la backend:", data);
+      console.log("📦 data.top3:", data.top3);
       router.push({
         pathname: "/(stack)/results",
         params: {

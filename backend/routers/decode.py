@@ -10,7 +10,7 @@ router = APIRouter()
 @router.post("/decode-barcode")
 async def decode_barcode(file: UploadFile = File(...)):
     try:
-        # Citim fișierul primit
+        
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert("RGB")
 

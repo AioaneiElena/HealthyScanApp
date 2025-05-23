@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, Button, Image, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import useAuthGuard from "../hooks/useAuthGuard";
 
 export default function BarcodeScan() {
+  useAuthGuard();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [productInfo, setProductInfo] = useState<any>(null);
@@ -24,7 +26,7 @@ export default function BarcodeScan() {
     }
   };
 
-  const decodeAndSearch = async (uri: string) => {
+    const decodeAndSearch = async (uri: string) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -58,20 +60,10 @@ export default function BarcodeScan() {
       console.log("📦 Produs primit:", result);
       setProductInfo(result);
 
-      // 🔍 Construim query și căutăm online
-      const queryText = `${result.nume} `.trim();
-      console.log("🔍 Trimit query către CSE:", queryText);
-      await searchOnline(queryText);
+      const query = `${result.brand} ${result.nume.split(' ')[0]} ${result.cantitate}`.trim().toLowerCase();
+      console.log("🔍 Trimit query:", query);
 
-    } catch (error) {
-      Alert.alert("Eroare", (error as Error).message);
-    }
-    setLoading(false);
-  };
-
-  const searchOnline = async (query: string) => {
-    try {
-      const response = await fetch("http://192.168.0.102:8000/scan-and-search", {
+      const searchRes = await fetch("http://192.168.0.102:8000/search", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -79,27 +71,28 @@ export default function BarcodeScan() {
         body: JSON.stringify({ query })
       });
 
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Eroare la căutare: ${error}`);
+      if (!searchRes.ok) {
+        const err = await searchRes.text();
+        throw new Error(`Căutare eșuată: ${err}`);
       }
 
-      const data = await response.json();
-      console.log("🌐 Rezultate căutare:", data.top3);
-
-      // Poți adăuga aici navigarea către pagina results dacă vrei
-       router.push({
-        pathname: "/(stack)/results",
-        params: {
-          query,
-          results: JSON.stringify(data.top3),
-        },
-      });
-
+      const data = await searchRes.json();
+      if (data.top3 && data.top3.length > 0) {
+        router.push({
+          pathname: "/(stack)/results",
+          params: {
+            query: data.query,
+            results: JSON.stringify(data.top3),
+          },
+        });
+      } else {
+        Alert.alert("Nicio ofertă găsită", "Încearcă un alt produs.");
+      }
 
     } catch (error) {
-      Alert.alert("Eroare căutare", (error as Error).message);
+      Alert.alert("Eroare", (error as Error).message);
     }
+    setLoading(false);
   };
 
   return (
@@ -112,6 +105,20 @@ export default function BarcodeScan() {
           <Text style={styles.label}>Brand: <Text style={styles.value}>{productInfo.brand}</Text></Text>
           <Text style={styles.label}>Nume: <Text style={styles.value}>{productInfo.nume}</Text></Text>
           <Text style={styles.label}>Cantitate: <Text style={styles.value}>{productInfo.cantitate}</Text></Text>
+          <Text style={styles.label}>NutriScore:<Text style={[styles.value,
+              {
+              color:
+                productInfo.nutriscore === "A" ? "green" :
+                productInfo.nutriscore === "E" ? "red" :
+                "#f9a825"
+            }]}>{" "}{productInfo.nutriscore}</Text></Text>
+            <Text style={styles.label}>NOVA:
+              <Text style={styles.value}> {productInfo.nova}</Text>
+            </Text>
+            <Text style={styles.label}>EcoScore:
+              <Text style={styles.value}> {productInfo.ecoscore}</Text>
+            </Text>
+
         </View>
       )}
     </View>

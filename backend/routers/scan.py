@@ -36,3 +36,15 @@ async def scan_and_search(
         "top3": top3,
         "toate": produse_cu_pret
     }
+
+@router.post("/search")
+async def direct_search(query: str = Body(..., embed=True)):
+    print("🟡 QUERY direct:", query)
+    rezultate = search_google_cse(query)
+    produse_cu_pret = adauga_pret_si_sorteaza(rezultate)
+    top3 = produse_cu_pret[:3]
+    return {
+        "query": query,
+        "top3": top3,
+        "toate": produse_cu_pret
+    }

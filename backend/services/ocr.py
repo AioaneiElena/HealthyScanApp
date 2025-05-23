@@ -3,7 +3,7 @@ import json
 import re
 import requests
 
-API_KEY = "AIzaSyC3YVbeQ9S4u29Mc1fjcBp5T41VblE7j2E"  # cheia ta de la Google Vision API
+API_KEY = "AIzaSyC3YVbeQ9S4u29Mc1fjcBp5T41VblE7j2E"  # cheia de la Google Vision API
 
 # Liste de cuvinte ignorate în query (stopwords)
 STOP_WORDS = {
@@ -12,7 +12,7 @@ STOP_WORDS = {
     'gramaj', 'produs', 'alimentar', 'litri', 'buc', 'gram', 'ml', 'l'
 }
 
-# Liste de branduri cunoscute (poți extinde după caz)
+# Liste de branduri cunoscute 
 BRANDURI = [
     "coca cola", "pepsi", "fanta", "sprite", "milka", "napolact", "dorna",
     "borsec", "ciucas", "carlsberg", "lays", "tide", "ariel", "heineken", "tuc"
@@ -63,7 +63,7 @@ def extract_query_from_image(image_bytes: bytes) -> str:
             brand_detectat = brand
             break
 
-    # Căutăm gramaje (ex: 2l, 500ml)
+    # Căutăm gramaje
     cantitati = [w for w in cuvinte if re.match(r"^\d{1,4}(ml|l|g|kg)$", w)]
 
     # Formăm query-ul final
