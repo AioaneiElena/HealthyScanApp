@@ -12,9 +12,14 @@ export default function HomeScreen() {
       { }
       <View style={styles.navbar}>
         <Text style={styles.navTitle}>🛒 Compară Prețuri</Text>
-        <TouchableOpacity onPress={() => router.push("/profile")}>
-          <Text style={styles.profileButton}>👤</Text>
-        </TouchableOpacity>
+        <View style={styles.navIcons}>
+          <TouchableOpacity onPress={() => router.push("/cart")}>
+            <Text style={styles.icon}>🛍️</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/profile")}>
+            <Text style={styles.icon}>👤</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Text style={styles.subtitle}>Scanează un produs și află cel mai mic preț!</Text>
@@ -79,4 +84,14 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
   },
+  navIcons: {
+    flexDirection: "row",
+    gap: 16,
+  },
+
+  icon: {
+    fontSize: 24,
+    paddingHorizontal: 4,
+  },
+
 });

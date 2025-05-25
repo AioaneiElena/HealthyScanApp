@@ -14,12 +14,22 @@ export default function ProfileScreen() {
     const fetchUser = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-        if (!token) throw new Error("Token lipsă");
+        if (!token) {
+          router.replace("/login");
+          return;
+        }
 
         const res = await fetch(`http://192.168.0.102:8000/me?token=${token}`);
         const data = await res.json();
 
-        if (!res.ok) throw new Error(data.detail || "Eroare");
+        if (res.status === 401) {
+          await AsyncStorage.removeItem("token");
+          Alert.alert("Sesiunea a expirat", "Te rugăm să te autentifici din nou.");
+          router.replace("/login");
+          return;
+        }
+
+        if (!res.ok) throw new Error(data.detail || "Eroare la server");
 
         setUser(data);
       } catch (err) {
