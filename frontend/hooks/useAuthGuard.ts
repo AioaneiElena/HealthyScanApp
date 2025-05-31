@@ -10,7 +10,7 @@ export default function useAuthGuard() {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        router.replace("/login"); // Redirecționează dacă nu există token
+        router.replace("/login"); 
       }
     };
 

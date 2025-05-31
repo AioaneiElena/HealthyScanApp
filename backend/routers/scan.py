@@ -16,7 +16,6 @@ async def scan_and_search(
     file: UploadFile = File(None),
     query: str = Body(default=None)
 ):
-    # Dacă avem fișier, extragem query cu OCR
     if file is not None:
         contents = await file.read()
         query = extract_query_from_image(contents)

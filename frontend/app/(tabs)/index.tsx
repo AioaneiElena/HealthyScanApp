@@ -1,97 +1,82 @@
 import React from "react";
-import { View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+} from "react-native";
 import { useRouter } from "expo-router";
-import useAuthGuard from "../../hooks/useAuthGuard";
+import { LinearGradient } from "expo-linear-gradient";
+import ButtonHover from "../../components/ButtonHover";
+import useUser from "../../hooks/useUser";
+
+type User = {
+  name: string;
+  email: string;
+};
 
 export default function HomeScreen() {
-  useAuthGuard();
   const router = useRouter();
+  const user = useUser(); 
+  const userInitial = user?.name?.charAt(0).toUpperCase() || "A";
 
   return (
-    <View style={styles.container}>
-      { }
-      <View style={styles.navbar}>
-        <Text style={styles.navTitle}>🛒 Compară Prețuri</Text>
-        <View style={styles.navIcons}>
-          <TouchableOpacity onPress={() => router.push("/cart")}>
-            <Text style={styles.icon}>🛍️</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/profile")}>
-            <Text style={styles.icon}>👤</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+    <LinearGradient
+      colors={["#ffd6ec", "#fff4b3"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.gradient}
+    >
+      <View style={styles.container}>
+        {/* TITLU */}
+        <Text style={styles.title}>🛒 Compară Prețuri</Text>
+        <Text style={styles.subtitle}>
+          Scanează un produs pentru a găsi cele mai bune oferte!
+        </Text>
 
-      <Text style={styles.subtitle}>Scanează un produs și află cel mai mic preț!</Text>
-
-      <View style={styles.buttonRow}>
-        <View style={styles.buttonWrapper}>
-          <Button
-            title="📷 Poză"
+        {/* BUTOANE */}
+        <View style={styles.buttonsColumn}>
+          <ButtonHover
+            imageSrc={require("../../assets/images/camera.png")}
+            label="Scanează etichetă"
             onPress={() => router.push("/scan_photo")}
-            color="#2e7d32"
           />
-        </View>
-        <View style={styles.buttonWrapper}>
-          <Button
-            title="📦 Cod de Bare"
+          <ButtonHover
+            imageSrc={require("../../assets/images/barcode.png")}
+            label="Scanează cod de bare"
             onPress={() => router.push("/barcode_scan")}
-            color="#1565c0"
           />
         </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   container: {
-    flex: 1, padding: 20, backgroundColor: "#f4f4f4",
-  },
-  navbar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  navTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  profileButton: {
-    fontSize: 24,
-    padding: 5,
+    flex: 1,
+    paddingTop: 200,
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "bold",
+    color: "#1b1b1b",
+    textAlign: "center",
     marginBottom: 10,
-    color: "#333",
   },
   subtitle: {
     fontSize: 16,
-    marginBottom: 30,
-    color: "#666",
+    color: "#444",
     textAlign: "center",
+    marginBottom: 40,
   },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "center",
+  buttonsColumn: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "space-around",
     gap: 20,
   },
-  buttonWrapper: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  navIcons: {
-    flexDirection: "row",
-    gap: 16,
-  },
-
-  icon: {
-    fontSize: 24,
-    paddingHorizontal: 4,
-  },
-
 });

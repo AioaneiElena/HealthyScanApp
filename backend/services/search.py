@@ -1,21 +1,16 @@
 import requests
 import re
 import time
-from services.price_extractors import extrage_pret_din_link  # pentru scraping
+from services.price_extractors import extrage_pret_din_link  
 
 API_KEY = "AIzaSyC3YVbeQ9S4u29Mc1fjcBp5T41VblE7j2E"
 CX_ID = "b2cff23a6d5a64c3e"
 
 def adauga_pret_si_sorteaza(rezultate: list[dict]) -> list[dict]:
-    rezultate_filtrate = []
-    for prod in rezultate:
-        # Filtrează doar rezultatele care conțin "borsec" în titlu/link
-        if 'borsec' in prod['titlu'].lower() or 'borsec' in prod['link'].lower():
-            rezultate_filtrate.append(prod)
-
-    for i, produs in enumerate(rezultate):
+    for produs in rezultate:
         link = produs.get("link")
         if not link:
+            produs["pret"] = None
             continue
 
         try:
@@ -26,14 +21,17 @@ def adauga_pret_si_sorteaza(rezultate: list[dict]) -> list[dict]:
 
         produs["pret"] = pret
 
-        if pret is not None:
-            rezultate_filtrate.append(produs)
+        time.sleep(1)  
 
-        # 🛡️ Protecție anti-blocking
-        time.sleep(1)  # Poți reduce la 0.5 sau crește la 2 dacă primești blocări
+    rezultate_sortate = sorted(
+        rezultate,
+        key=lambda p: p["pret"] if p["pret"] is not None else float("inf")
+    )
 
-    print(f"🔍 Din {len(rezultate)} produse, {len(rezultate_filtrate)} au preț real extras.")
-    return sorted(rezultate_filtrate, key=lambda p: p["pret"])
+    total_extrase = sum(1 for p in rezultate if p["pret"] is not None)
+    print(f"🔍 Din {len(rezultate)} produse, {total_extrase} au preț real extras.")
+    return rezultate_sortate
+
 
 def search_google_cse(query: str):
     url = "https://www.googleapis.com/customsearch/v1"

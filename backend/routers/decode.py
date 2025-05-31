@@ -14,10 +14,8 @@ async def decode_barcode(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert("RGB")
 
-        # Convertim imaginea pentru OpenCV
         open_cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
-        # Decodăm codul de bare
         barcodes = decode(open_cv_image)
 
         if not barcodes:

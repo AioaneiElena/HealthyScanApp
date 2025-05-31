@@ -24,17 +24,17 @@ def lookup_barcode(code: str):
     nutriscore = produs.get("nutriscore_grade", "necunoscut").upper()
     nova = produs.get("nova_group", "necunoscut")
     eco_score = produs.get("ecoscore_grade", "necunoscut").upper()
-
+    categorie = produs.get("categories", "necunoscut")
     sanatate = f"NutriScore: {nutriscore}, NOVA: {nova}, EcoScore: {eco_score}"
 
-    query = f"{brand} {nume}".strip().lower()
-    query = query.replace(",", "").replace("  ", " ")
+    query = nume.lower()
+    query = query.replace(",", "").replace("  ", " ").strip()
 
     print("🟡 QUERY din barcode:", query)
 
     rezultate = search_google_cse(query)
     produse_cu_pret = adauga_pret_si_sorteaza(rezultate)
-    top3 = produse_cu_pret[:3]
+    toate = produse_cu_pret
 
     return {
     "brand": brand,
@@ -45,7 +45,8 @@ def lookup_barcode(code: str):
     "nova": nova,
     "ecoscore": eco_score,
     "sanatate": sanatate,
+    "categorie": categorie,
     "query": query,
-    "top3": top3,
+    "rezultate": toate,
     }
 

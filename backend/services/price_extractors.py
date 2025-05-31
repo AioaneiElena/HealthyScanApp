@@ -1,4 +1,3 @@
-# services/price_extractors.py
 import re
 import json
 from bs4 import BeautifulSoup
@@ -17,6 +16,8 @@ def extrage_pret_din_link(link: str) -> float | None:
             return parse_mega_image(html)
         elif "auchan.ro" in link:
             return parse_auchan(html)
+        elif "kaufland.ro" in link:
+            return parse_kaufland(html)
         else:
             return None
     except Exception as e:
@@ -33,7 +34,6 @@ def parse_emag(html: str) -> float | None:
             return float(pret_text) / 100
         except:
             pass
-    # Backup: JSON-LD
     for script in soup.find_all("script", type="application/ld+json"):
         try:
             data = json.loads(script.text)
@@ -95,4 +95,31 @@ def parse_auchan(html: str) -> float | None:
             return float(re.findall(r"[\d.]+", pret_text)[0])
         except:
             pass
+    return None
+
+def parse_kaufland(html: str) -> float | None:
+    from bs4 import BeautifulSoup
+    import json
+    import re
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    for script in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(script.string or "")
+            if isinstance(data, dict):
+                if "offers" in data and "price" in data["offers"]:
+                    return float(data["offers"]["price"])
+                if "@graph" in data:
+                    for entry in data["@graph"]:
+                        if "offers" in entry and "price" in entry["offers"]:
+                            return float(entry["offers"]["price"])
+        except Exception:
+            continue
+
+    text = soup.get_text(" ", strip=True)
+    match = re.search(r"(\d+[.,]?\d*)\s*lei", text.lower())
+    if match:
+        return float(match.group(1).replace(",", "."))
+
     return None

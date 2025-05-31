@@ -14,7 +14,6 @@ router = APIRouter()
 SECRET_KEY = "cheie_super_secreta"
 ALGORITHM = "HS256"
 
-# --- Pydantic models ---
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
@@ -25,12 +24,10 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-# --- DB session ---
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
 
-# --- Register route ---
 @router.post("/register")
 async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == user.email))
@@ -51,7 +48,6 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
     await db.commit()
     return {"msg": "Cont creat cu succes"}
 
-# --- Login route ---
 @router.post("/login")
 async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == user.email))
@@ -66,9 +62,13 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     }
 
     token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
-    return {"access_token": token, "token_type": "bearer"}
 
-# --- Token verification ---
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "name": db_user.first_name  
+    }
+
 def verify_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -76,7 +76,6 @@ def verify_token(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Token invalid")
 
-# --- Me route (verifică token direct din query param) ---
 @router.get("/me")
 async def get_me(token: str, db: AsyncSession = Depends(get_db)):
     data = verify_token(token)

@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, Button, Image, ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ActivityIndicator,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Platform,
+  StatusBar,
+  ScrollView,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import useAuthGuard from "../hooks/useAuthGuard";
+import { LinearGradient } from 'expo-linear-gradient';
 
-export default function BarcodeScan() {
+const STATUS_BAR_HEIGHT = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
+
+export default function BarcodeScanScreen() {
   useAuthGuard();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,11 +36,11 @@ export default function BarcodeScan() {
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setImageUri(uri);
-      await decodeAndSearch(uri);
+      await decodeAndFetch(uri);
     }
   };
 
-    const decodeAndSearch = async (uri: string) => {
+  const decodeAndFetch = async (uri: string) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -36,7 +50,7 @@ export default function BarcodeScan() {
         type: "image/jpeg"
       } as any);
 
-      const decodeRes = await fetch("http://192.168.0.102:8000/decode-barcode", {
+      const decodeRes = await fetch("http://192.168.1.102:8000/decode-barcode", {
         method: "POST",
         headers: { "Content-Type": "multipart/form-data" },
         body: formData
@@ -48,46 +62,15 @@ export default function BarcodeScan() {
       }
 
       const { code } = await decodeRes.json();
-      console.log("📥 Cod extras:", code);
 
-      const productRes = await fetch(`http://192.168.0.102:8000/barcode/${code}`);
+      const productRes = await fetch(`http://192.168.1.102:8000/barcode/${code}`);
       if (!productRes.ok) {
         const errText = await productRes.text();
         throw new Error(`Produs negăsit: ${errText}`);
       }
 
       const result = await productRes.json();
-      console.log("📦 Produs primit:", result);
       setProductInfo(result);
-
-      const query = `${result.brand} ${result.nume.split(' ')[0]} ${result.cantitate}`.trim().toLowerCase();
-      console.log("🔍 Trimit query:", query);
-
-      const searchRes = await fetch("http://192.168.0.102:8000/search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ query })
-      });
-
-      if (!searchRes.ok) {
-        const err = await searchRes.text();
-        throw new Error(`Căutare eșuată: ${err}`);
-      }
-
-      const data = await searchRes.json();
-      if (data.top3 && data.top3.length > 0) {
-        router.push({
-          pathname: "/(stack)/results",
-          params: {
-            query: data.query,
-            results: JSON.stringify(data.top3),
-          },
-        });
-      } else {
-        Alert.alert("Nicio ofertă găsită", "Încearcă un alt produs.");
-      }
 
     } catch (error) {
       Alert.alert("Eroare", (error as Error).message);
@@ -96,41 +79,148 @@ export default function BarcodeScan() {
   };
 
   return (
-    <View style={styles.container}>
-      <Button title="📷 Scanează Cod de Bare" onPress={pickImage} color="#1565c0" />
-      {loading && <ActivityIndicator size="large" style={{ margin: 20 }} />}
-      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-      {productInfo && (
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Brand: <Text style={styles.value}>{productInfo.brand}</Text></Text>
-          <Text style={styles.label}>Nume: <Text style={styles.value}>{productInfo.nume}</Text></Text>
-          <Text style={styles.label}>Cantitate: <Text style={styles.value}>{productInfo.cantitate}</Text></Text>
-          <Text style={styles.label}>NutriScore:<Text style={[styles.value,
-              {
-              color:
-                productInfo.nutriscore === "A" ? "green" :
-                productInfo.nutriscore === "E" ? "red" :
-                "#f9a825"
-            }]}>{" "}{productInfo.nutriscore}</Text></Text>
-            <Text style={styles.label}>NOVA:
-              <Text style={styles.value}> {productInfo.nova}</Text>
-            </Text>
-            <Text style={styles.label}>EcoScore:
-              <Text style={styles.value}> {productInfo.ecoscore}</Text>
-            </Text>
+    <LinearGradient
+      colors={["#ffd6ec", "#fff4b3"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.gradient}
+    >
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Scanează un Cod de Bare</Text>
+        <Text style={styles.subtitle}>Fotografiază eticheta unui produs pentru a-i detecta codul și a căuta cele mai bune oferte.</Text>
 
-        </View>
-      )}
-    </View>
+        <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
+          <Text style={styles.cameraIcon}>📷</Text>
+          <Text style={styles.cameraText}>Deschide Camera</Text>
+        </TouchableOpacity>
+
+        {loading && <ActivityIndicator size="large" style={{ margin: 20 }} />}
+        {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
+
+        {productInfo && (
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Brand: <Text style={styles.value}>{productInfo.brand}</Text></Text>
+            <Text style={styles.label}>Nume: <Text style={styles.value}>{productInfo.nume}</Text></Text>
+            <Text style={styles.label}>Cantitate: <Text style={styles.value}>{productInfo.cantitate}</Text></Text>
+            <Text style={styles.label}>NutriScore:
+              <Text style={[styles.value, {
+                color:
+                  productInfo.nutriscore === "A" ? "green" :
+                  productInfo.nutriscore === "E" ? "red" :
+                  "#f9a825"
+              }]}> {productInfo.nutriscore}</Text>
+            </Text>
+            <Text style={styles.label}>NOVA: <Text style={styles.value}> {productInfo.nova}</Text></Text>
+            <Text style={styles.label}>EcoScore: <Text style={styles.value}> {productInfo.ecoscore}</Text></Text>
+          </View>
+        )}
+
+        {productInfo?.nutriscore && (productInfo.nutriscore === "D" || productInfo.nutriscore === "E") && (
+          <TouchableOpacity
+            style={styles.altButton}
+            onPress={() => router.push({
+              pathname: "/alternatives",
+              params: {
+                name: productInfo.nume,
+                categorie: productInfo.categorie,
+              },
+            })}
+          >
+            <Text style={styles.altButtonText}>🍃 Vezi alternative mai sănătoase</Text>
+          </TouchableOpacity>
+        )}
+
+        {productInfo && (
+          <>
+            <TouchableOpacity
+              style={styles.altButton}
+              onPress={() => router.push({
+                pathname: "/results",
+                params: {
+                  query: productInfo.query,
+                  results: JSON.stringify(productInfo.rezultate || []),
+                },
+              })}
+            >
+              <Text style={styles.altButtonText}>🔎 Vezi ce e în magazine</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setImageUri(null);
+              setProductInfo(null);
+            }}>
+              <Text style={styles.rescan}>🔁 Încearcă alt produs</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: 'flex-start', alignItems: 'center' },
-  image: { width: 200, height: 200, marginTop: 20, borderRadius: 8 },
+  gradient: { flex: 1 },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: STATUS_BAR_HEIGHT + 100,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  cameraButton: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 16,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    marginBottom: 20,
+  },
+  cameraIcon: { fontSize: 32, marginBottom: 4 },
+  cameraText: { fontSize: 16, fontWeight: '600', color: '#1565c0' },
+  image: { width: 220, height: 220, marginTop: 10, borderRadius: 8 },
   infoBox: {
-    marginTop: 20, padding: 16, backgroundColor: '#e0f7fa', borderRadius: 8
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#e0f7fa',
+    borderRadius: 8,
+    width: '100%',
   },
   label: { fontWeight: 'bold', marginBottom: 4 },
-  value: { fontWeight: 'normal', color: '#333' }
+  value: { fontWeight: 'normal', color: '#333' },
+  rescan: {
+    marginTop: 20,
+    fontWeight: 'bold',
+    color: '#1565c0',
+    textDecorationLine: 'underline',
+  },
+  altButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: "#81c784",
+    borderRadius: 8,
+  },
+  altButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center",
+  },
 });
