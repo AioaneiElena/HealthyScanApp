@@ -49,7 +49,7 @@ export default function ProductSummaryScreen() {
           });
         }}
       >
-        <Text style={styles.buttonText}>🍃 Vezi alternative mai sănătoase</Text>
+        <Text style={styles.buttonText}>🍃 Vezi alternative mai sănătoaseeee</Text>
       </TouchableOpacity>
     </ScrollView>
   );

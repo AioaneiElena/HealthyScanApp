@@ -10,10 +10,10 @@ export default function StartScreen() {
       <Text style={styles.subtitle}>Începe prin a te autentifica sau înregistra</Text>
 
       <View style={styles.buttonWrapper}>
-        <Button title="🔐 Login" onPress={() => router.push("/login")} color="#2e7d32" />
+        <Button title="🔐 Login" onPress={() => router.push("/auth/login")} color="#2e7d32" />
       </View>
       <View style={styles.buttonWrapper}>
-         <Button title="🆕 Sign Up" onPress={() => router.push("/signup")} color="#d32f2f" />
+         <Button title="🆕 Sign Up" onPress={() => router.push("/auth/signup")} color="#d32f2f" />
 
       </View>
     </View>

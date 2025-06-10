@@ -1,61 +1,69 @@
 import requests
-import re
-import time
-from services.price_extractors import extrage_pret_din_link  
+from urllib.parse import urlparse
 
 API_KEY = "AIzaSyC3YVbeQ9S4u29Mc1fjcBp5T41VblE7j2E"
 CX_ID = "b2cff23a6d5a64c3e"
 
-def adauga_pret_si_sorteaza(rezultate: list[dict]) -> list[dict]:
-    for produs in rezultate:
-        link = produs.get("link")
-        if not link:
-            produs["pret"] = None
-            continue
+MAGAZINE = [
+    "kaufland.ro",
+    "emag.ro",
+    "carrefour.ro",
+    "auchan.ro",
+    "mega-image.ro",
+    "selgros.ro",
+    "metro.ro",
+    "penny.ro",
+    "profi.ro",
+]
 
-        try:
-            pret = extrage_pret_din_link(link)
-        except Exception as e:
-            print(f"❌ Eroare la extragere preț pentru {link}: {e}")
-            pret = None
-
-        produs["pret"] = pret
-
-        time.sleep(1)  
-
-    rezultate_sortate = sorted(
-        rezultate,
-        key=lambda p: p["pret"] if p["pret"] is not None else float("inf")
-    )
-
-    total_extrase = sum(1 for p in rezultate if p["pret"] is not None)
-    print(f"🔍 Din {len(rezultate)} produse, {total_extrase} au preț real extras.")
-    return rezultate_sortate
-
-
-def search_google_cse(query: str):
+def search_google_cse(query: str, site: str = "") -> list[dict]:
     url = "https://www.googleapis.com/customsearch/v1"
+    full_query = f"{query} site:{site}" if site else query
+
     params = {
         "key": API_KEY,
         "cx": CX_ID,
-        "q": query
+        "q": full_query
     }
 
     response = requests.get(url, params=params)
     if response.status_code != 200:
-        print("❌ Eroare CSE:", response.text)
+        print(f"❌ Eroare CSE pentru {site}:", response.text)
         return []
 
     data = response.json()
-    print("📡 CSE URL:", response.url)
-    print("📄 Total rezultate brute:", len(data.get("items", [])))
-
     return [
         {
             "titlu": item.get("title"),
             "link": item.get("link"),
             "descriere": item.get("snippet"),
-            "imagine": item.get("pagemap", {}).get("cse_image", [{}])[0].get("src")
+            "imagine": item.get("pagemap", {}).get("cse_image", [{}])[0].get("src"),
+            "magazin": site.split(".")[0].capitalize(),
+            "search_link": f"https://www.google.com/search?q={query}+site:{site}"
         }
-        for item in data.get("items", [])
+        for item in data.get("items", [])[:3]  
     ]
+
+def cauta_pe_magazine(query: str) -> dict:
+    rezultate = {}
+    for site in MAGAZINE:
+        rezultate[site.split(".")[0].capitalize()] = search_google_cse(query, site)
+    return rezultate
+
+
+def grupeaza_rezultate_dupa_magazin(rezultate: list[dict], query: str) -> dict:
+    grupate = {}
+
+    for produs in rezultate:
+        domeniu = urlparse(produs["link"]).netloc.replace("www.", "")
+        nume = domeniu.split(".")[0]
+        magazin = nume.lower()
+
+        produs["magazin"] = magazin  
+        if "titlu" not in produs or not produs["titlu"]:
+            produs["titlu"] = "Produs necunoscut"
+
+        produs["search_link"] = f"https://www.google.com/search?q={query}+site:{domeniu}"
+        grupate.setdefault(magazin, []).append(produs)
+
+    return {k: v[:3] for k, v in grupate.items()}

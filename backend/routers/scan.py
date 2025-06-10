@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Body
 from services.ocr import extract_query_from_image
-from services.search import search_google_cse, adauga_pret_si_sorteaza
+from services.search import search_google_cse, grupeaza_rezultate_dupa_magazin
 
 router = APIRouter()
 
@@ -21,29 +21,33 @@ async def scan_and_search(
         query = extract_query_from_image(contents)
 
     if not query:
-        return {"query": "invalid", "top3": [], "toate": []}
+        return {"query": "invalid", "top3": [], "toate": [], "grupate": {}}
 
     print("🟡 QUERY:", query)
     rezultate = search_google_cse(query)
     print("🟢 REZULTATE:", len(rezultate))
 
-    produse_cu_pret = adauga_pret_si_sorteaza(rezultate)
-    top3 = produse_cu_pret[:3]
+    grupate = grupeaza_rezultate_dupa_magazin(rezultate, query)
+    top3 = [item for group in grupate.values() for item in group][:3]
 
     return {
         "query": query,
         "top3": top3,
-        "toate": produse_cu_pret
+        "toate": rezultate,
+        "grupate": grupate
     }
+
 
 @router.post("/search")
 async def direct_search(query: str = Body(..., embed=True)):
     print("🟡 QUERY direct:", query)
     rezultate = search_google_cse(query)
-    produse_cu_pret = adauga_pret_si_sorteaza(rezultate)
-    top3 = produse_cu_pret[:3]
+    grupate = grupeaza_rezultate_dupa_magazin(rezultate, query)
+    top3 = [item for group in grupate.values() for item in group][:3]
+
     return {
         "query": query,
         "top3": top3,
-        "toate": produse_cu_pret
+        "toate": rezultate,
+        "grupate": grupate
     }

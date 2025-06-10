@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import useAuthGuard from "../hooks/useAuthGuard";
 import { LinearGradient } from 'expo-linear-gradient';
+import useAuthGuard from "../../hooks/useAuthGuard";
 
 const STATUS_BAR_HEIGHT = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
 
@@ -49,7 +49,7 @@ export default function ScanPhotoScreen() {
         type: "image/jpeg",
       } as any);
 
-      const response = await fetch("http://192.168.1.102:8000/scan-and-search", {
+      const response = await fetch("http://192.168.0.102:8000/scan-and-search", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",

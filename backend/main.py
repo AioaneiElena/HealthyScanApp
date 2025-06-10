@@ -9,7 +9,11 @@ from routers import scan, barcode
 from routers import decode
 from routers import auth
 from routers import alternatives
-from routers import deals_api
+from routers import recipes
+from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
 app.add_middleware(
@@ -25,4 +29,5 @@ app.include_router(barcode.router)
 app.include_router(decode.router)
 app.include_router(auth.router)
 app.include_router(alternatives.router)
-app.include_router(deals_api.router)
+app.mount("/media", StaticFiles(directory="media"), name="media")
+app.include_router(recipes.router)
