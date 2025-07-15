@@ -1,8 +1,8 @@
 import requests
 from urllib.parse import urlparse
 
-API_KEY = "AIzaSyC3YVbeQ9S4u29Mc1fjcBp5T41VblE7j2E"
-CX_ID = "b2cff23a6d5a64c3e"
+API_KEY = "***"
+CX_ID = "**"
 
 MAGAZINE = [
     "kaufland.ro",
