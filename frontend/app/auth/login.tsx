@@ -17,7 +17,7 @@ import { useRouter } from "expo-router"
 import { LinearGradient } from "expo-linear-gradient"
 import { Ionicons } from "@expo/vector-icons"
 import FancyButton from "../../components/ButtonHover"
-
+import { BASE_URL } from "../../constants/api";
 const STATUS_BAR_HEIGHT = Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 24
 
 export default function LoginScreen() {
@@ -35,7 +35,7 @@ export default function LoginScreen() {
 
     setLoading(true)
     try {
-      const res = await fetch("http://192.168.0.102:8000/login", {
+      const res = await fetch(`${BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

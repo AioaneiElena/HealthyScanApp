@@ -6,7 +6,7 @@ import { LinearGradient } from "expo-linear-gradient"
 import FancyButton from "../../components/ButtonHover"
 import ScreenWrapper from "../../components/ScreenWrapper"
 import useUser from "../../hooks/useUser"
-
+import { BASE_URL } from "../../constants/api";
 type User = {
   name: string
   email: string
@@ -70,8 +70,8 @@ export default function HomeScreen() {
                 icon="🔍"
                 label="Istoric Rețete"
                 onPress={() => router.push("/saved-recipes")}
-                backgroundColor="rgba(209, 114, 178, 0.8)"
-                pressedColor="rgba(190, 110, 154, 0.9)"
+                backgroundColor="rgba(233, 59, 144, 0.68)"
+                pressedColor="rgba(219, 55, 145, 0.9)"
                 style={styles.quickButton}
               />
 
@@ -79,7 +79,7 @@ export default function HomeScreen() {
                 icon="📋"
                 label="Istoric cautări"
                 onPress={() => router.push("/history")}
-                backgroundColor="rgba(228, 161, 211, 0.8)"
+                backgroundColor="rgba(251, 141, 181, 0.8)"
                 pressedColor="rgba(216, 152, 207, 0.9)"
                 style={styles.quickButton}
               />

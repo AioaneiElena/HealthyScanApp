@@ -11,7 +11,7 @@ import CustomNavbar from "../../components/CustomNavbar"
 import CustomBottomNavbar from "../../components/CustomBottomNavbar"
 import ScreenWrapper from "../../components/ScreenWrapper"
 import FancyButton from "../../components/ButtonHover"
-
+import { BASE_URL } from "../../constants/api";
 type SavedRecipe = {
   id: string
   name: string
@@ -183,7 +183,7 @@ export default function GenerateRecipeScreen() {
     setReteta("")
 
     try {
-      const response = await fetch("http://192.168.0.102:8000/reteta", {
+      const response = await fetch(`${BASE_URL}/reteta`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cos, dieta, scop, timp, context }),
@@ -595,16 +595,16 @@ export default function GenerateRecipeScreen() {
                 <View style={styles.resultActions}>
                   <FancyButton
                     icon={saving ? "⏳" : "💾"}
-                    label={saving ? "Se salvează..." : "Salvează rețeta"}
+                    label={saving ? "Se salvează..." : "Salvează"}
                     onPress={saveRecipe}
-                    backgroundColor="rgba(34, 197, 94, 0.8)"
-                    pressedColor="rgba(22, 163, 74, 0.9)"
+                    backgroundColor="rgba(234, 131, 203, 0.35)"
+                    pressedColor="rgba(231, 65, 170, 0.41)"
                     style={styles.actionButton}
                   />
 
                   <FancyButton
                     icon="🔄"
-                    label="Generează alta"
+                    label="Regenerează"
                     onPress={() => {
                       setReteta("")
                       setIngredients("")
@@ -613,8 +613,8 @@ export default function GenerateRecipeScreen() {
                       setTimp("")
                       setContext("")
                     }}
-                    backgroundColor="rgba(59, 130, 246, 0.8)"
-                    pressedColor="rgba(37, 99, 235, 0.9)"
+                    backgroundColor="rgba(246, 59, 159, 0.33)"
+                    pressedColor="rgba(235, 37, 205, 0.28)"
                     style={styles.actionButton}
                   />
                 </View>

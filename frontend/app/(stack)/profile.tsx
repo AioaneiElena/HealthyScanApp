@@ -17,7 +17,7 @@ import { useRouter } from "expo-router"
 import * as ImagePicker from "expo-image-picker"
 import { LinearGradient } from "expo-linear-gradient"
 import useAuthGuard from "../../hooks/useAuthGuard"
-
+import { BASE_URL } from "../../constants/api";
 const STATUS_BAR_HEIGHT = Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 24
 
 export default function ProfileScreen() {
@@ -35,7 +35,7 @@ export default function ProfileScreen() {
       const token = await AsyncStorage.getItem("token")
       if (!token) return router.replace("/auth/login")
 
-      const res = await fetch(`http://192.168.0.102:8000/me?token=${token}`)
+      const res = await fetch(`${BASE_URL}/me?token=${token}`)
       const data = await res.json()
 
       if (res.status === 401) {
@@ -89,7 +89,7 @@ export default function ProfileScreen() {
     } as any)
 
     try {
-      const res = await fetch(`http://192.168.0.102:8000/upload-avatar?token=${token}`, {
+      const res = await fetch(`${BASE_URL}/upload-avatar?token=${token}`, {
         method: "POST",
         headers: { "Content-Type": "multipart/form-data" },
         body: formData,
@@ -109,7 +109,7 @@ export default function ProfileScreen() {
   const handleSave = async () => {
     const token = await AsyncStorage.getItem("token")
     try {
-      const res = await fetch("http://192.168.0.102:8000/update-profile?token=" + token, {
+      const res = await fetch(`${BASE_URL}/update-profile?token=` + token, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   cancelButton: {
-    backgroundColor: "transparent",
+    backgroundColor: "rgba(245, 17, 131, 0.62)",
     borderWidth: 1,
     borderColor: "#999",
     paddingVertical: 14,

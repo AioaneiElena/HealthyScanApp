@@ -22,6 +22,7 @@ import CustomBottomNavbar from "../../components/CustomBottomNavbar"
 import FancyButton from "../../components/ButtonHover"
 import useAuthGuard from "../../hooks/useAuthGuard"
 
+
 type CartItem = {
   imagine?: string
   titlu?: string
@@ -182,7 +183,7 @@ export default function CartScreen() {
                   icon="🗑️"
                   label="Golește lista"
                   onPress={clearCart}
-                  backgroundColor="#f44336"
+                  backgroundColor="rgba(236, 72, 153, 0.8)"
                   pressedColor="#d32f2f"
                   style={styles.clearButton}
                 />

@@ -23,15 +23,13 @@ import FancyButton from "../../components/ButtonHover"
 import useAuthGuard from "../../hooks/useAuthGuard"
 import { useRouter } from "expo-router"
 
-// Limite recomandate OMS și nutriționiști
 const DEFAULT_LIMITS = {
   calorii: 2000,
-  sare: 5, // grame pe zi
-  zahar: 50, // grame pe zi
-  grasimi: 70, // grame pe zi
+  sare: 5, 
+  zahar: 50, 
+  grasimi: 70, 
 }
 
-// Algoritm pentru calcularea limitelor personalizate
 const calculatePersonalLimits = (
   weight: number,
   height: number,
@@ -39,7 +37,6 @@ const calculatePersonalLimits = (
   gender: "M" | "F",
   activityLevel: string,
 ) => {
-  // Formula Harris-Benedict pentru metabolismul bazal
   let bmr = 0
   if (gender === "M") {
     bmr = 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age
@@ -47,7 +44,6 @@ const calculatePersonalLimits = (
     bmr = 447.593 + 9.247 * weight + 3.098 * height - 4.33 * age
   }
 
-  // Factor de activitate
   const activityFactors = {
     sedentary: 1.2,
     light: 1.375,
@@ -60,13 +56,12 @@ const calculatePersonalLimits = (
 
   return {
     calorii: Math.round(tdee),
-    sare: weight > 70 ? 6 : 5, // Persoanele mai grele pot tolera puțin mai multă sare
-    zahar: Math.round((tdee * 0.1) / 4), // 10% din calorii din zahăr (4 cal/g)
-    grasimi: Math.round((tdee * 0.3) / 9), // 30% din calorii din grăsimi (9 cal/g)
+    sare: weight > 70 ? 6 : 5, 
+    zahar: Math.round((tdee * 0.1) / 4), 
+    grasimi: Math.round((tdee * 0.3) / 9), 
   }
 }
 
-// Algoritm pentru recomandări de exerciții
 const getExerciseRecommendations = (excessCalories: number, weight: number) => {
   const exercises = [
     { name: "Mers rapid", caloriesPerMinute: weight * 0.05, icon: "🚶‍♂️" },
@@ -82,10 +77,10 @@ const getExerciseRecommendations = (excessCalories: number, weight: number) => {
       ...exercise,
       minutes: Math.round(excessCalories / exercise.caloriesPerMinute),
     }))
-    .filter((ex) => ex.minutes > 0 && ex.minutes <= 120) // Exerciții rezonabile (max 2h)
+    .filter((ex) => ex.minutes > 0 && ex.minutes <= 120) 
 }
 
-// Configurația stărilor emoționale
+
 const MOOD_CONFIG = {
   energetic: { emoji: "😊", label: "Energic", type: "positive" },
   satisfied: { emoji: "😌", label: "Sătul", type: "positive" },
@@ -114,7 +109,7 @@ export default function NutritionJournalScreen() {
     activityLevel: "moderate",
   })
 
-  // State pentru modal-ul de feedback emoțional
+  
   const [showMoodModal, setShowMoodModal] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<any>(null)
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
@@ -136,7 +131,7 @@ export default function NutritionJournalScreen() {
           const profile = JSON.parse(profileRaw)
           setUserProfile(profile)
 
-          // Calculează limitele personalizate
+          
           const personalLimits = calculatePersonalLimits(
             profile.weight,
             profile.height,
@@ -153,7 +148,6 @@ export default function NutritionJournalScreen() {
   }
 
   const saveUserProfile = async () => {
-    // Ascunde tastatura înainte de salvare
     Keyboard.dismiss()
 
     try {
@@ -200,7 +194,6 @@ export default function NutritionJournalScreen() {
         const raw = await AsyncStorage.getItem(key)
         const history = raw ? JSON.parse(raw) : {}
 
-        // Filtrează datele duplicate și sortează
         const uniqueDates = [...new Set(Object.keys(history))].sort().reverse()
         setDatesWithEntries(uniqueDates)
 
@@ -217,8 +210,6 @@ export default function NutritionJournalScreen() {
         }
 
         setTotals(sum)
-
-        // Verifică și afișează avertismente
         checkNutritionalWarnings(sum)
       }
     } catch (err) {
@@ -230,17 +221,14 @@ export default function NutritionJournalScreen() {
   const checkNutritionalWarnings = (totals: any) => {
     const warnings = []
 
-    // Avertisment pentru sare
     if (totals.sare > limits.sare) {
       warnings.push(`⚠️ Ai depășit limita de sare cu ${(totals.sare - limits.sare).toFixed(1)}g. Risc de hipertensiune!`)
     }
 
-    // Avertisment pentru zahăr
     if (totals.zahar > limits.zahar) {
       warnings.push(`🍭 Ai depășit limita de zahăr cu ${(totals.zahar - limits.zahar).toFixed(1)}g. Risc de diabet!`)
     }
 
-    // Recomandări pentru calorii în exces
     if (totals.calorii > limits.calorii && userProfile) {
       const excess = totals.calorii - limits.calorii
       const exercises = getExerciseRecommendations(excess, userProfile.weight)
@@ -460,8 +448,8 @@ export default function NutritionJournalScreen() {
                 }
                 setShowProfileModal(true)
               }}
-              backgroundColor={userProfile ? "rgba(34, 197, 94, 0.8)" : "rgba(236, 72, 153, 0.8)"}
-              pressedColor={userProfile ? "rgba(22, 163, 74, 0.9)" : "rgba(219, 39, 119, 0.9)"}
+              backgroundColor={userProfile ? "rgba(236, 72, 153, 0.8)" : "rgba(236, 72, 153, 0.8)"}
+              pressedColor={userProfile ? "rgba(219, 39, 119, 0.9)" : "rgba(219, 39, 119, 0.9)"}
               style={styles.profileButton}
             />
           </View>
@@ -495,7 +483,7 @@ export default function NutritionJournalScreen() {
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="rgba(34, 197, 94, 0.9)" />
+              <ActivityIndicator size="large" color="rgba(236, 72, 153, 0.8)" />
               <Text style={styles.loadingText}>Se încarcă datele...</Text>
             </View>
           ) : (
@@ -515,8 +503,8 @@ export default function NutritionJournalScreen() {
                   icon="🧠"
                   label="Vezi analiza emoțională"
                   onPress={() => router.push("/emotionalhealth" as any)}
-                  backgroundColor="rgba(147, 51, 234, 0.8)"
-                  pressedColor="rgba(126, 34, 206, 0.9)"
+                  backgroundColor="rgba(236, 72, 153, 0.8)"
+                  pressedColor="rgba(219, 39, 119, 0.9)"
                   style={styles.emotionalButton}
                   fullWidth={true}
                 />
@@ -617,12 +605,11 @@ export default function NutritionJournalScreen() {
                 icon="💾"
                 label="Salvează"
                 onPress={saveUserProfile}
-                backgroundColor="rgba(34, 197, 94, 0.8)"
-                pressedColor="rgba(22, 163, 74, 0.9)"
+                backgroundColor="rgba(234, 131, 203, 0.71)"
+                pressedColor="rgba(213, 60, 188, 0.9)"
                 style={styles.modalButton}
               />
               <FancyButton
-                icon="❌"
                 label="Anulează"
                 onPress={() => {
                   Keyboard.dismiss()
@@ -789,7 +776,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   dateButtonSelected: {
-    backgroundColor: "rgba(34, 197, 94, 0.9)",
+    backgroundColor: "rgba(229, 88, 151, 0.9)",
   },
   dateText: {
     color: "#333",
@@ -1035,8 +1022,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   genderButtonSelected: {
-    backgroundColor: "rgba(34, 197, 94, 0.1)",
-    borderColor: "rgba(34, 197, 94, 0.5)",
+    backgroundColor: "rgba(234, 131, 203, 0.35)",
+    borderColor: "rgba(227, 94, 187, 0.35)",
   },
   genderText: {
     fontSize: 14,
@@ -1044,7 +1031,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   genderTextSelected: {
-    color: "rgba(34, 197, 94, 0.9)",
+    color: "rgba(163, 22, 121, 0.35)",
     fontWeight: "bold",
   },
   modalActions: {

@@ -21,8 +21,9 @@ import CustomBottomNavbar from "../../components/CustomBottomNavbar"
 import ScreenWrapper from "../../components/ScreenWrapper"
 import FancyButton from "../../components/ButtonHover"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { BASE_URL } from "../../constants/api";
+import { additiveInfo } from "../../utils/e_additives"; // ajustează dacă ai altă cale
 
-// Tipuri pentru API-ul Open Food Facts
 interface OpenFoodFactsAdditive {
   additive: {
     id: string
@@ -146,92 +147,39 @@ export default function NutritionScanScreen() {
   const router = useRouter()
 
   // Funcție pentru a obține informații despre aditivi de la Open Food Facts
-  const fetchAdditiveInfo = async (eCode: string): Promise<ProcessedAdditiveInfo | null> => {
-    try {
-      setAdditiveLoading(true)
-      const response = await fetch(`https://world.openfoodfacts.org/additive/${eCode.toLowerCase()}.json`)
+  const fetchAdditiveInfo = async (code: string): Promise<ProcessedAdditiveInfo> => {
+    const lowercaseCode = code.toLowerCase();
+    const fallback = additiveInfo[lowercaseCode];
 
-      if (!response.ok) {
-        console.log(`API call failed for ${eCode}:`, response.status)
-        return null
-      }
-
-      const data: OpenFoodFactsAdditive = await response.json()
-      console.log("🔍 ADDITIVE RAW DATA", data) // <<< Adaugă aici
-      if (!data.additive) {
-        console.log(`No additive data found for ${eCode}`)
-        return null
-      }
-
-      const additive = data.additive
-
-      // Extrage numele în română sau engleză
-      const name = additive.name?.ro || additive.name?.en || eCode
-
-      // Extrage descrierea
-      const description =
-        additive.description?.ro || additive.description?.en || "Nu sunt disponibile informații detaliate."
-
-      // Extrage informațiile despre risc
-      const riskInfo = additive.risk?.ro || additive.risk?.en || ""
-
-      // Determină nivelul de risc pe baza textului
-      let risk: "low" | "medium" | "high" | "unknown" = "unknown"
-      const riskLower = riskInfo.toLowerCase()
-
-      if (
-        riskLower.includes("safe") ||
-        riskLower.includes("sigur") ||
-        riskLower.includes("no risk") ||
-        riskLower.includes("fără risc")
-      ) {
-        risk = "low"
-      } else if (
-        riskLower.includes("moderate") ||
-        riskLower.includes("moderat") ||
-        riskLower.includes("caution") ||
-        riskLower.includes("atenție")
-      ) {
-        risk = "medium"
-      } else if (
-        riskLower.includes("danger") ||
-        riskLower.includes("pericol") ||
-        riskLower.includes("harmful") ||
-        riskLower.includes("nociv") ||
-        riskLower.includes("cancer")
-      ) {
-        risk = "high"
-      }
-
-      // Extrage categoria/funcția
-      const category = additive.function?.ro || additive.function?.en || "Aditiv alimentar"
-
-      // Extrage evaluarea EFSA
-      const efsaEvaluation = additive.efsa_evaluation?.ro || additive.efsa_evaluation?.en
-      const efsaDate = additive.efsa_evaluation_date
-
-      // Extrage informații Wikipedia
-      const wikiInfo = additive.wikidata?.ro || additive.wikidata?.en
-
+    // Dacă nu există în baza locală
+    if (!fallback) {
       return {
-        code: eCode.toUpperCase(),
-        name,
-        description,
-        risk,
-        riskDescription: riskInfo || "Nu sunt disponibile informații despre risc.",
-        category,
-        efsaEvaluation,
-        efsaDate,
-        wikiInfo,
-      }
-    } catch (error) {
-      console.error(`Error fetching additive info for ${eCode}:`, error)
-      return null
-    } finally {
-      setAdditiveLoading(false)
+        code: code.toUpperCase(),
+        name: code.toUpperCase(),
+        description: "Informație indisponibilă pentru acest aditiv.",
+        risk: "unknown",
+        riskDescription: "Nivel de risc necunoscut.",
+        category: "Aditiv alimentar",
+      };
     }
-  }
 
+    // Mapăm riscul într-o descriere prietenoasă
+    const riskDescriptions: Record<string, string> = {
+      low: "Considerat sigur în cantități normale.",
+      medium: "Poate avea efecte adverse moderate.",
+      high: "Poate prezenta un risc ridicat pentru sănătate.",
+      unknown: "Nivel de risc necunoscut.",
+    };
+
+    return {
+      code: code.toUpperCase(),
+      name: code.toUpperCase(),
+      description: fallback.description,
+      risk: fallback.risk,
+      riskDescription: riskDescriptions[fallback.risk],
+      category: "Aditiv alimentar",
+    };
+  };
   // Funcție pentru extragerea corectă a nutrienților
   const extractNutrients = (nutrienti: any, portionGrams = 100) => {
     console.log("🔍 Nutrienti raw:", nutrienti)
@@ -281,7 +229,7 @@ export default function NutritionScanScreen() {
 
     setBarcodeLoading(true)
     try {
-      const res = await fetch(`http://192.168.0.102:8000/barcode/${barcodeInput.trim()}`)
+      const res = await fetch(`${BASE_URL}/barcode/${barcodeInput.trim()}`)
       if (!res.ok) {
         const msg = await res.text()
         throw new Error(`Produs negăsit: ${msg}`)
@@ -342,7 +290,7 @@ export default function NutritionScanScreen() {
         type: "image/jpeg",
       } as any)
 
-      const decodeRes = await fetch("http://192.168.0.102:8000/decode-barcode", {
+      const decodeRes = await fetch(`${BASE_URL}/decode-barcode`, {
         method: "POST",
         headers: { "Content-Type": "multipart/form-data" },
         body: formData,
@@ -355,7 +303,7 @@ export default function NutritionScanScreen() {
 
       const { code } = await decodeRes.json()
 
-      const productRes = await fetch(`http://192.168.0.102:8000/barcode/${code}`)
+      const productRes = await fetch(`${BASE_URL}/barcode/${code}`)
       if (!productRes.ok) {
         const errText = await productRes.text()
         throw new Error(`Produs negăsit: ${errText}`)

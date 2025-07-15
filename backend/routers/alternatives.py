@@ -4,6 +4,11 @@ from services.recipes_service import model
 
 router = APIRouter()
 
+from fastapi import APIRouter, HTTPException, Request
+import requests
+
+router = APIRouter()
+
 @router.post("/alternatives")
 async def get_healthier_alternatives(request: Request):
     body = await request.json()
@@ -13,42 +18,60 @@ async def get_healthier_alternatives(request: Request):
     if not product_name:
         raise HTTPException(status_code=400, detail="Missing product name")
 
+    # 1. Căutăm produsul pe OpenFoodFacts
     search_url = f"https://world.openfoodfacts.org/cgi/search.pl?search_terms={product_name}&json=1&page_size=1"
     resp = requests.get(search_url)
 
+    if resp.status_code != 200:
+        raise HTTPException(status_code=500, detail="Eroare la căutarea produsului")
+
+    products_found = resp.json().get("products", [])
+    if not products_found:
+        raise HTTPException(status_code=404, detail="Produs negăsit")
+
+    produs = products_found[0]
+    categories_tags = produs.get("categories_tags", [])
+
+    # 2. Alegem o categorie generală potrivită
     category_slug = None
+    for tag in categories_tags:
+        if tag.startswith("en:") and len(tag.split(":")[-1]) > 3:
+            category_slug = tag.split(":")[-1]
+            break
 
-    if resp.status_code == 200:
-        results = resp.json().get("products", [])
-        if results:
-            product = results[0]
-            categories = product.get("categories_tags", [])
-            if categories:
-                category_slug = categories[0].split(":")[-1]
+    if not category_slug and fallback_category:
+        category_slug = fallback_category.replace(" ", "-").lower()
 
-    # fallback to frontend-provided category
     if not category_slug:
-        if fallback_category:
-            category_slug = fallback_category.replace(" ", "-").lower()
-        else:
-            raise HTTPException(status_code=404, detail="No category found")
+        raise HTTPException(status_code=404, detail="Fără categorie validă")
 
+    # 3. Căutăm produse în acea categorie
     category_url = f"https://world.openfoodfacts.org/category/{category_slug}.json"
     r = requests.get(category_url)
 
     if r.status_code != 200:
-        raise HTTPException(status_code=500, detail="Failed to fetch category")
+        raise HTTPException(status_code=500, detail="Eroare la accesarea categoriei")
 
-    products = r.json().get("products", [])
-    suggestions = []
+    produse = r.json().get("products", [])
+    sugestii = []
 
-    for p in products:
-        score = p.get("nutriscore_grade", "X").upper()
-        name = p.get("product_name", "").strip()
-        if score in ["A", "B", "C"] and name and name.lower() != product_name.lower():
-            suggestions.append(name)
+    for p in produse:
+        nume = p.get("product_name", "").strip()
+        scor = p.get("nutriscore_grade", "").upper()
 
-    return suggestions[:3] or ["No healthier alternatives found."]
+        if (
+            scor in ["A", "B", "C"]
+            and nume
+            and nume.lower() != product_name.lower()
+            and len(nume) > 3
+        ):
+            sugestii.append(nume)
+
+    # 4. Eliminăm duplicate
+    sugestii_unice = list(dict.fromkeys(sugestii))
+
+    return sugestii_unice[:3] if sugestii_unice else ["Nu am găsit alternative mai sănătoase."]
+
 
 @router.post("/alternatives-ai")
 async def ai_suggestions_only(request: Request):
@@ -79,9 +102,8 @@ async def ai_suggestions_only(request: Request):
 
     categorie_umanoida = category_slug.replace("-", " ")
     prompt = (
-        f"Produsul {product_name} are un scor NutriScore {nutriscore}. "
-        f"Oferă-mi 3 alternative mai sănătoase (cu NutriScore A, B sau C) "
-        f"din categoria {categorie_umanoida}. Răspunde cu o listă simplă."
+        f"Produsul {product_name} are un scor NutriScore {nutriscore}. Este luat din baza de date OpenFoodFacts. "
+        f"Oferă-mi 3 alternative mai sănătoase, naturale, ca sa inlocuiesc  {product_name}, deci ceva din aceeasi categorie. Răspunde cu o listă simplă."
     )
 
     try:

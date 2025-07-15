@@ -24,11 +24,12 @@ def search_google_cse(query: str, site: str = "") -> list[dict]:
         "key": API_KEY,
         "cx": CX_ID,
         "q": full_query
+        
     }
 
     response = requests.get(url, params=params)
     if response.status_code != 200:
-        print(f"❌ Eroare CSE pentru {site}:", response.text)
+        print(f"Eroare CSE pentru {site}:", response.text)
         return []
 
     data = response.json()
@@ -41,7 +42,7 @@ def search_google_cse(query: str, site: str = "") -> list[dict]:
             "magazin": site.split(".")[0].capitalize(),
             "search_link": f"https://www.google.com/search?q={query}+site:{site}"
         }
-        for item in data.get("items", [])[:3]  
+        for item in data.get("items", []) 
     ]
 
 def cauta_pe_magazine(query: str) -> dict:
@@ -66,4 +67,4 @@ def grupeaza_rezultate_dupa_magazin(rezultate: list[dict], query: str) -> dict:
         produs["search_link"] = f"https://www.google.com/search?q={query}+site:{domeniu}"
         grupate.setdefault(magazin, []).append(produs)
 
-    return {k: v[:3] for k, v in grupate.items()}
+    return grupate

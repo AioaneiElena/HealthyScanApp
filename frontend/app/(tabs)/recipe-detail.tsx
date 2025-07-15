@@ -8,7 +8,7 @@ import { Ionicons } from "@expo/vector-icons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import useAuthGuard from "../../hooks/useAuthGuard"
 import FancyButton from "../../components/ButtonHover"
-
+import { BASE_URL } from "../../constants/api";
 const STATUS_BAR_HEIGHT = Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 24
 
 type SavedRecipe = {

@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Text, StyleSheet, Platform } from "react-native
 import { useRouter, usePathname } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
-
+import { BASE_URL } from "../constants/api" 
 export default function CustomBottomNavbar() {
   const router = useRouter()
   const pathname = usePathname()

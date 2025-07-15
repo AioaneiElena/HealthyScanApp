@@ -21,7 +21,7 @@ import CustomNavbar from "../../components/CustomNavbar"
 import CustomBottomNavbar from "../../components/CustomBottomNavbar"
 import ScreenWrapper from "../../components/ScreenWrapper"
 import FancyButton from "../../components/ButtonHover"
-
+import { BASE_URL } from "../../constants/api";
 type SavedRecipe = {
   id: string
   name: string

@@ -16,7 +16,7 @@ import { useRouter } from "expo-router"
 import useUser from "../hooks/useUser"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
-
+import { BASE_URL } from "../constants/api"; 
 const STATUS_BAR_HEIGHT = Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 24
 
 export default function CustomNavbar() {
@@ -32,7 +32,7 @@ export default function CustomNavbar() {
     }
 
     try {
-      const response = await fetch("http://192.168.0.102:8000/search", {
+      const response = await fetch('${BASE_URL}/search', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: query.trim() }),

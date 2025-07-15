@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons"
 import CustomNavbar from "../../components/CustomNavbar"
 import ScreenWrapper from "../../components/ScreenWrapper"
 import FancyButton from "../../components/ButtonHover"
-
+import { BASE_URL } from "../../constants/api";
 type AlternativeSection = {
   title: string
   data: string[]
@@ -38,7 +38,7 @@ export default function AlternativesScreen() {
 
   const fetchOpenFoodAlternatives = async () => {
     try {
-      const res = await fetch("http://192.168.0.102:8000/alternatives", {
+      const res = await fetch(`${BASE_URL}/alternatives`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, categorie }),
@@ -55,7 +55,7 @@ export default function AlternativesScreen() {
 
   const fetchAiAlternatives = async () => {
     try {
-      const res = await fetch("http://192.168.0.102:8000/alternatives-ai", {
+      const res = await fetch(`${BASE_URL}/alternatives-ai`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

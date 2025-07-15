@@ -8,7 +8,6 @@ import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import ScreenWrapper from "../../components/ScreenWrapper"
 import useAuthGuard from "../../hooks/useAuthGuard"
-
 const screenWidth = Dimensions.get("window").width - 40
 
 type MoodEntry = {
@@ -69,7 +68,6 @@ export default function EmotionalWellnessScreen() {
       const now = Date.now()
       const timeframeDays = selectedTimeframe === "week" ? 7 : selectedTimeframe === "month" ? 30 : 365
 
-      // Modificăm modul în care iterăm prin history pentru a evita eroarea
       Object.keys(history).forEach((date) => {
         const entries = Array.isArray(history[date]) ? history[date] : [];
         entries.forEach((entry: MoodEntry) => {

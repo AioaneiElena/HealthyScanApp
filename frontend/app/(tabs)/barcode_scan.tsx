@@ -21,7 +21,7 @@ import CustomNavbar from "../../components/CustomNavbar"
 import CustomBottomNavbar from "../../components/CustomBottomNavbar"
 import ScreenWrapper from "../../components/ScreenWrapper"
 import FancyButton from "../../components/ButtonHover"
-
+import { BASE_URL } from "../../constants/api";
 export default function BarcodeScanScreen() {
   useAuthGuard()
   const [imageUri, setImageUri] = useState<string | null>(null)
@@ -56,7 +56,7 @@ export default function BarcodeScanScreen() {
         type: "image/jpeg",
       } as any)
 
-      const decodeRes = await fetch("http://192.168.0.102:8000/decode-barcode", {
+      const decodeRes = await fetch(`${BASE_URL}/decode-barcode`, {
         method: "POST",
         headers: { "Content-Type": "multipart/form-data" },
         body: formData,
@@ -70,7 +70,7 @@ export default function BarcodeScanScreen() {
       const { code } = await decodeRes.json()
 
       // Use the new barcode-search endpoint
-      const searchRes = await fetch(`http://192.168.0.102:8000/barcode-search/${code}`)
+      const searchRes = await fetch(`${BASE_URL}/barcode-search/${code}`)
       if (!searchRes.ok) {
         const errText = await searchRes.text()
         throw new Error(`Produs negăsit: ${errText}`)
@@ -92,7 +92,7 @@ export default function BarcodeScanScreen() {
 
     setSearchLoading(true)
     try {
-      const response = await fetch("http://192.168.0.102:8000/search", {
+      const response = await fetch(`${BASE_URL}/search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: searchQuery.trim() }),

@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import useAuthGuard from "../../hooks/useAuthGuard"
 import ScreenWrapper from "../../components/ScreenWrapper"
-
+import { BASE_URL } from "../../constants/api";
 const screenWidth = Dimensions.get("window").width - 32
 
 type SearchEntry = {
@@ -20,7 +20,7 @@ type StatsData = {
   totalSearches: number
   uniqueProducts: number
   totalCartItems: number
-  averagePrice: number
+  totalScannedProducts: number  // înlocuit averagePrice
   topQueries: Array<{ name: string; count: number }>
   nutriScoreDistribution: Array<{ score: string; count: number; percentage: number }>
   storePreferences: Array<{ store: string; count: number; percentage: number }>
@@ -98,10 +98,9 @@ export default function StatsScreen() {
 
     const totalCartItems = cart.length
 
-    const prices = cart
-      .filter((item) => item.pret && !isNaN(item.pret))
-      .map((item) => Number(item.pret))
-    const averagePrice = prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 0
+    const totalScannedProducts = istoric.reduce((total, entry) => {
+      return total + (entry.rezultate ? entry.rezultate.length : 0)
+    }, 0)
     
     const nutriCount: Record<string, number> = { A: 0, B: 0, C: 0, D: 0, E: 0 }
     nutriHistory.forEach((entry) => {
@@ -168,7 +167,7 @@ export default function StatsScreen() {
       totalSearches,
       uniqueProducts,
       totalCartItems,
-      averagePrice,
+      totalScannedProducts,  // înlocuit averagePrice
       topQueries,
       nutriScoreDistribution,
       storePreferences,
@@ -281,9 +280,9 @@ export default function StatsScreen() {
             </View>
 
             <View style={styles.overviewCard}>
-              <Ionicons name="cash-outline" size={24} color="rgba(245, 158, 11, 0.9)" />
-              <Text style={styles.overviewNumber}>{stats.averagePrice.toFixed(0)}</Text>
-              <Text style={styles.overviewLabel}>Preț mediu (lei)</Text>
+              <Ionicons name="scan-outline" size={24} color="rgba(245, 158, 11, 0.9)" />
+              <Text style={styles.overviewNumber}>{stats.totalScannedProducts}</Text>
+              <Text style={styles.overviewLabel}>Produse scanate</Text>
             </View>
           </View>
 
