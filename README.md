@@ -51,11 +51,6 @@ cd healthy-scan
 cd backend
 pip install -r requirements.txt
 
-# Create .env manually in backend directory and add:
-# GOOGLE_API_KEY=your_google_key
-# GOOGLE_CX_ID=your_search_engine_id
-# GEMINI_API_KEY=your_gemini_key
-
 uvicorn main:app --reload
 # Backend will be running at http://localhost:8000
 
