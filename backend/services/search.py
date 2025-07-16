@@ -1,8 +1,8 @@
 import requests
 from urllib.parse import urlparse
 
-API_KEY = "***"
-CX_ID = "**"
+API_KEY = "GOOGLE_API_KEY"
+CX_ID = "GOOGLE_CX_ID"
 
 MAGAZINE = [
     "kaufland.ro",
