@@ -44,19 +44,22 @@ GEMINI_API_KEY=your_gemini_key
 ```
 
 ✅ Step 1 – Clone the project
- git clone https://github.com/AioaneiElena/HealthyScan.git
+```bash
+git clone https://github.com/AioaneiElena/HealthyScan.git
 cd HealthyScan
-
+```
 ✅ Step 2 – Backend setup
+```bash
 cd backend
 pip install -r requirements.txt
-
 uvicorn main:app --reload
- Backend will be running at http://localhost:8000
+```
+Backend will be running at http://localhost:8000
 
 ✅ Step 3 – Frontend setup (open a new terminal or tab)
+```bash
 cd ../frontend
 npm install
 npx expo start
-
+```
 Now use the Expo Go app to scan the QR code from terminal or browser.
