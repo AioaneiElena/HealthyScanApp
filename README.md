@@ -44,8 +44,8 @@ GEMINI_API_KEY=your_gemini_key
 ```
 
 ✅ Step 1 – Clone the project
-git clone https://github.com/username/healthy-scan.git
-cd healthy-scan
+ git clone https://github.com/AioaneiElena/HealthyScan.git
+cd HealthyScan
 
 ✅ Step 2 – Backend setup
 cd backend
