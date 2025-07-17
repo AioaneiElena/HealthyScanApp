@@ -63,3 +63,12 @@ npm install
 npx expo start
 ```
 Now use the Expo Go app to scan the QR code from terminal or browser.
+
+# Photos:
+<img width="699" height="675" alt="Screenshot 2025-06-17 222339" src="https://github.com/user-attachments/assets/3d8f5f30-ea8b-4b98-823c-a78636b72b99" />
+<img width="653" height="625" alt="Screenshot 2025-06-17 222545" src="https://github.com/user-attachments/assets/c9c60e42-fb8f-4ef4-90de-0e54fca2bace" />
+<img width="1064" height="683" alt="Screenshot 2025-06-17 223523" src="https://github.com/user-attachments/assets/a603877f-1543-4055-bfa8-a51595684b09" />
+<img width="948" height="611" alt="Screenshot 2025-06-17 224401" src="https://github.com/user-attachments/assets/8934bf00-c315-4137-abf2-4b105354ac79" />
+<img width="707" height="679" alt="Screenshot 2025-06-17 225329" src="https://github.com/user-attachments/assets/cdca1c3c-b7cf-4a93-8d35-815e39ea27b2" />
+<img width="1077" height="677" alt="Screenshot 2025-06-17 225750" src="https://github.com/user-attachments/assets/9dab2ef0-26bb-4d2d-9994-d40d75b1843e" />
+
